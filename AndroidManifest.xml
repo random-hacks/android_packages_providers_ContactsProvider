@@ -17,6 +17,12 @@
     <uses-permission android:name="android.permission.WRITE_CONTACTS" />
     <uses-permission android:name="android.permission.USE_RESERVED_DISK" />
 
+    <!-- MoKee CloudNumber Dependencies -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="mokee.permission.READ_PHONE_LOCATION" />
+    <uses-permission android:name="mokee.permission.WRITE_PHONE_LOCATION" />
+
     <permission
             android:name="android.permission.SEND_CALL_LOG_CHANGE"
             android:label="Broadcast that a change happened to the call log."

@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2011 The Android Open Source Project
+ * Copyright (C) 2015-2019 The MoKee Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +29,8 @@ import com.android.i18n.phonenumbers.Phonenumber.PhoneNumber;
 import com.android.i18n.phonenumbers.geocoding.PhoneNumberOfflineGeocoder;
 
 import com.google.android.collect.Sets;
+import com.mokee.cloud.location.LocationInfo;
+import com.mokee.cloud.location.LocationUtils;
 
 import java.util.Locale;
 import java.util.Set;
@@ -49,6 +52,7 @@ import java.util.Set;
     private PhoneNumberUtil mPhoneNumberUtil;
     private PhoneNumberOfflineGeocoder mPhoneNumberOfflineGeocoder;
     private final Locale mLocale;
+    private Context mContext;
 
     public static synchronized DefaultCallLogInsertionHelper getInstance(Context context) {
         if (sInstance == null) {
@@ -60,6 +64,7 @@ import java.util.Set;
     private DefaultCallLogInsertionHelper(Context context) {
         mCountryMonitor = new CountryMonitor(context);
         mLocale = context.getResources().getConfiguration().locale;
+        mContext = context;
     }
 
     @Override
@@ -72,6 +77,13 @@ import java.util.Set;
                 getGeocodedLocationFor(values.getAsString(Calls.NUMBER), countryIso));
 
         final String number = values.getAsString(Calls.NUMBER);
+
+        // Insert the geocoded location, so that we do not need to compute it on the fly.
+        LocationInfo locationInfo = LocationUtils.getLocationInfo(mContext.getContentResolver(), number);
+        if (locationInfo != null) {
+            values.put(Calls.GEOCODED_LOCATION, locationInfo.getLocation());
+        }
+
         if (LEGACY_UNKNOWN_NUMBERS.contains(number)) {
             values.put(Calls.NUMBER_PRESENTATION, Calls.PRESENTATION_UNKNOWN);
             values.put(Calls.NUMBER, "");
