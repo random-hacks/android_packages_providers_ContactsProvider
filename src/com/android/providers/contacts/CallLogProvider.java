@@ -490,12 +490,13 @@ public class CallLogProvider extends ContentProvider {
         long rowId = createDatabaseModifier(mCallsInserter).insert(copiedValues);
         if (rowId > 0) {
             Uri uriWithID = ContentUris.withAppendedId(uri, rowId);
-            if (MoKeeUtils.isSupportLanguage(true) && !TextUtils.isEmpty(values.getAsString(Calls.NUMBER))) {
-                ContentValues locationValues = new ContentValues(values);
-                LocationInfo locationInfo = LocationUtils.getLocationInfo(getContext().getContentResolver(), values.getAsString(Calls.NUMBER));
+            String number = values.getAsString(Calls.NUMBER);
+            if (MoKeeUtils.isOnline(getContext()) && MoKeeUtils.isSupportLanguage(true) && !TextUtils.isEmpty(number)) {
+                LocationInfo locationInfo = LocationUtils.getLocationInfo(getContext().getContentResolver(), number);
                 // Update when location info is empty or use offline engine and usermark is empty and update 3 days ago or update 3 days ago and use online engine.
                 if (LocationUtils.shouldUpdateLocationInfo(locationInfo)) {
-                    checkLocationInfoFromCloud(locationInfo, locationValues, values.getAsString(Calls.NUMBER), uriWithID);
+                    ContentValues locationValues = new ContentValues(values);
+                    checkLocationInfoFromCloud(locationInfo, locationValues, number, uriWithID);
                 }
             }
             return uriWithID;
@@ -514,7 +515,7 @@ public class CallLogProvider extends ContentProvider {
                 }
                 update(uriWithID, values, null, null);
             }
-        }, getContext(), true);
+        }, getContext());
     }
 
     private int updateInternal(Uri uri, ContentValues values,
